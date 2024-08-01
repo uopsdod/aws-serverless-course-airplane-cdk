@@ -50,10 +50,7 @@ cdk deploy PipelineStack --require-approval never
 
 # Deploy beta 
 npx cdk synth ServiceStack-beta -c stage=beta
-npx cdk synth DashboardStack-beta -c stage=beta
-npx cdk destroy DashboardStack-beta -c stage=beta --force
 npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
-npx cdk deploy DashboardStack-beta -c stage=beta --require-approval never
 
 npx cdk synth S3StaticWebsiteStack-beta -c stage=beta
 npx cdk deploy S3StaticWebsiteStack-beta -c stage=beta --require-approval never

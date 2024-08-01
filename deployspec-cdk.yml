@@ -14,14 +14,13 @@ phases:
       - stage=$STAGE
       - echo "Synthesizing Service Stack"
       - npx cdk synth ServiceStack-$stage -c stage=$stage
-      - echo "Synthesizing Dashboard Stack"
-      - npx cdk synth DashboardStack-$stage -c stage=$stage
+      - echo "Synthesizing S3StaticWebsiteStack Stack"
+      - npx cdk synth S3StaticWebsiteStack-$stage -c stage=$stage
   post_build:
     commands:
       - echo "Deploying Service via CDK"
-      - npx cdk destroy DashboardStack-$stage -c stage=$stage --force
-      # - npx cdk deploy ServiceStack-$stage -c stage=$stage --require-approval never
-      - npx cdk deploy DashboardStack-$stage -c stage=$stage --require-approval never # this deploys ServiceStack as a dependency of DashboardStack 
+      - npx cdk deploy ServiceStack-$stage -c stage=$stage --require-approval never
+      - npx cdk deploy S3StaticWebsiteStack-$stage -c stage=$stage --require-approval never
 cache:
   paths:
     - '/root/.npm'

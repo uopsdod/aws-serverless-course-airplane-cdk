@@ -3,7 +3,6 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ServiceStack } from '../lib/service';
 import { PipelineStack } from '../lib/pipeline';
-import { DashboardStack } from '../lib/dashboard';
 import { S3StaticWebsiteStack } from '../lib/s3-static-website-stack';
 
 const accountId = '659104334423';
@@ -28,15 +27,6 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
   LAYER_ARTIFACT_SSM_KEY: pipelineStack.LAYER_ARTIFACT_SSM_KEY,  
   PARSER_ARTIFACT_SSM_KEY: pipelineStack.PARSER_ARTIFACT_SSM_KEY,
   WRAPPER_PARSER_ARTIFACT_SSM_KEY: pipelineStack.WRAPPER_PARSER_ARTIFACT_SSM_KEY,
-  env: {
-    account: accountId,
-    region: region
-  }
-});
-
-const dashboardStack = new DashboardStack(app, `DashboardStack-${stage}`, {
-  STAGE: stage,
-  serviceStack: serviceStack,
   env: {
     account: accountId,
     region: region
