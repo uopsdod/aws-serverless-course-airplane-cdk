@@ -19,6 +19,8 @@ interface ServiceStackProps extends cdk.StackProps {
   WRAPPER_PARSER_ARTIFACT_SSM_KEY: string;
   SUFFIX_TAG: string;
   SUFFIX_RANDOM: string;
+  APPLE_WEBSITE_URL: string;
+  BANANA_WEBSITE_URL: string;
 }
 
 
@@ -53,8 +55,8 @@ export class ServiceStack extends cdk.Stack {
 
     // SQS for wrapper and parser 
     // Create the SQS queue
-    const queue = new sqs.Queue(this, `sqs-for-bag-link-to-check-${suffix_tag}-${suffix_random}-${stage}`, {
-      queueName: `sqs-for-bag-link-to-check-${suffix_tag}-${suffix_random}-${stage}`,
+    const queue = new sqs.Queue(this, `sqs-for-best-plane-ticket-${suffix_tag}-${suffix_random}-${stage}`, {
+      queueName: `sqs-for-best-plane-ticket-${suffix_tag}-${suffix_random}-${stage}`,
       visibilityTimeout: cdk.Duration.minutes(15), // must >= lambda timeout setting
       retentionPeriod: cdk.Duration.days(1)
     });
@@ -112,14 +114,17 @@ export class ServiceStack extends cdk.Stack {
         S3_BUCKET_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping-12938u9120837091283',
         S3_FILE_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping - file.csv',
         SQS_URL_FOR_BAG_LINK_TO_CHECK: queue.queueUrl,
+        APPLE_WEBSITE_URL: props.APPLE_WEBSITE_URL,
+        BANANA_WEBSITE_URL: props.BANANA_WEBSITE_URL,
       }
     });
 
     // Add SQS queue as an event source to the Lambda function
-    this.parserLambdaFunction.addEventSource(new lambdaEventSources.SqsEventSource(queue, {
-      batchSize: 1,
-      enabled: true
-    }));
+    // TODO: creat a new lambda function to receive this sqs message 
+    // this.parserLambdaFunction.addEventSource(new lambdaEventSources.SqsEventSource(queue, {
+    //   batchSize: 1,
+    //   enabled: true
+    // }));
 
     // EventBridge Rule
     const rule = new events.Rule(this, `WeekdayScheduler-${suffix_tag}-${suffix_random}-${stage}`, {

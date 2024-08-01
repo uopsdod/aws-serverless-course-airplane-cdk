@@ -20,7 +20,7 @@ phases:
     commands:
       - echo "Deploying Service via CDK"
       - npx cdk deploy ServiceStack-$stage -c stage=$stage --require-approval never
-      - npx cdk deploy S3StaticWebsiteStack-$stage -c stage=$stage --require-approval never
+      # - npx cdk deploy S3StaticWebsiteStack-$stage -c stage=$stage --require-approval never
 cache:
   paths:
     - '/root/.npm'

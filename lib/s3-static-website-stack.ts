@@ -12,6 +12,8 @@ interface S3StaticWebsiteProps extends cdk.StackProps {
 }
 
 export class S3StaticWebsiteStack extends Stack {
+  public readonly appleWebsiteUrl: string;
+  public readonly bananaWebsiteUrl: string;
   constructor(scope: Construct, id: string, props: S3StaticWebsiteProps) {
     super(scope, id, props);
 
@@ -48,11 +50,13 @@ export class S3StaticWebsiteStack extends Stack {
       destinationBucket: bucket5Rows,
     });
 
+    this.appleWebsiteUrl = bucket3Rows.bucketWebsiteUrl;
     new cdk.CfnOutput(this, `WebsiteURL3Rows-${suffix}`, {
       value: bucket3Rows.bucketWebsiteUrl,
       description: `URL for the 3-row flight prices website - ${suffix}`,
     });
 
+    this.bananaWebsiteUrl = bucket5Rows.bucketWebsiteUrl;
     new cdk.CfnOutput(this, `WebsiteURL5Rows-${suffix}`, {
       value: bucket5Rows.bucketWebsiteUrl,
       description: `URL for the 5-row flight prices website - ${suffix}`,

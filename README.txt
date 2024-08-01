@@ -49,12 +49,11 @@ cdk deploy PipelineStack --require-approval never
 # Trigger Pipeline
 
 # Deploy beta 
-npx cdk synth ServiceStack-beta -c stage=beta
-npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
-
 npx cdk synth S3StaticWebsiteStack-beta -c stage=beta
 npx cdk deploy S3StaticWebsiteStack-beta -c stage=beta --require-approval never
 
+npx cdk synth ServiceStack-beta -c stage=beta
+npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
 
 # follow deployspec-cdk.yml
  # Delete Depedent Stacks 

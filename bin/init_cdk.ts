@@ -19,6 +19,15 @@ const pipelineStack = new PipelineStack(app, 'PipelineStack', {
 // Retrieve the stage context variable, with a default value of 'dev'
 const stage = app.node.tryGetContext('stage') || 'dev';
 const suffix_random = generateRandomSuffix()
+const s3StaticWebsiteStack = new S3StaticWebsiteStack(app, `S3StaticWebsiteStack-${stage}`, {
+  STAGE: stage,
+  SUFFIX_RANDOM: suffix_random,
+  env: {
+    account: accountId,
+    region: region
+  }
+});
+
 const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
   STAGE: stage,
   SUFFIX_TAG: "serverless",
@@ -27,15 +36,8 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
   LAYER_ARTIFACT_SSM_KEY: pipelineStack.LAYER_ARTIFACT_SSM_KEY,  
   PARSER_ARTIFACT_SSM_KEY: pipelineStack.PARSER_ARTIFACT_SSM_KEY,
   WRAPPER_PARSER_ARTIFACT_SSM_KEY: pipelineStack.WRAPPER_PARSER_ARTIFACT_SSM_KEY,
-  env: {
-    account: accountId,
-    region: region
-  }
-});
-
-const s3StaticWebsiteStack = new S3StaticWebsiteStack(app, `S3StaticWebsiteStack-${stage}`, {
-  STAGE: stage,
-  SUFFIX_RANDOM: suffix_random,
+  APPLE_WEBSITE_URL: s3StaticWebsiteStack.appleWebsiteUrl,
+  BANANA_WEBSITE_URL: s3StaticWebsiteStack.bananaWebsiteUrl,
   env: {
     account: accountId,
     region: region
