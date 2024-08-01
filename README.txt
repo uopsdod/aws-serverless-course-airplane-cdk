@@ -66,7 +66,10 @@ npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
 
 # Nexts
  - [DONE] push git commit 
- - next: start to parse your 2 mock sites 
- - next: add dynamodb 
+ - [DONE] start to parse your 2 mock sites 
+ - [DONE] SNS > Email 
+ - [DONE] leverage SSM Key/Value Pair to decouple cdk stacks 
+ - next: use dynamodb 
+ - next: use API Gateway 
 
  
