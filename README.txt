@@ -63,7 +63,7 @@ npx cdk deploy S3StaticWebsiteStack-beta -c stage=beta --require-approval never
 
 
 # Nexts
- - next: push git commit 
+ - [DONE] push git commit 
  - next: start to parse your 2 mock sites 
  - next: add dynamodb 
 
