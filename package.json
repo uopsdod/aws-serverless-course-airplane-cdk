@@ -6,8 +6,12 @@
     "@aws-cdk/aws-iam": "^1.204.0",
     "@aws-cdk/aws-lambda": "^1.204.0",
     "@aws-cdk/aws-s3": "^1.204.0",
+    "@aws-cdk/aws-s3-deployment": "^1.204.0",
     "@aws-cdk/aws-sns": "^1.204.0",
     "@aws-cdk/core": "^1.204.0",
     "aws-cdk-lib": "^2.150.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.2"
   }
 }

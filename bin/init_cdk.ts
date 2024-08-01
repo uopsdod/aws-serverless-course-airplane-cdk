@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { ServiceStack } from '../lib/service';
 import { PipelineStack } from '../lib/pipeline';
 import { DashboardStack } from '../lib/dashboard';
+import { S3StaticWebsiteStack } from '../lib/s3-static-website-stack';
 
 const accountId = '659104334423';
 const region = 'us-east-1';
@@ -36,6 +37,15 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
 const dashboardStack = new DashboardStack(app, `DashboardStack-${stage}`, {
   STAGE: stage,
   serviceStack: serviceStack,
+  env: {
+    account: accountId,
+    region: region
+  }
+});
+
+const s3StaticWebsiteStack = new S3StaticWebsiteStack(app, `S3StaticWebsiteStack-${stage}`, {
+  STAGE: stage,
+  SUFFIX_RANDOM: suffix_random,
   env: {
     account: accountId,
     region: region

@@ -35,7 +35,8 @@ cd {your_cdk_folder/}
 cdk init app --language=typescript
 
 # Install Required CDK Libraries
-npm install @aws-cdk/aws-iam @aws-cdk/aws-ec2 @aws-cdk/aws-s3 @aws-cdk/aws-lambda @aws-cdk/aws-sns @aws-cdk/aws-events @aws-cdk/aws-events-targets aws-cdk-lib @aws-cdk/core
+npm install @aws-cdk/aws-iam @aws-cdk/aws-ec2 @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment @aws-cdk/aws-lambda @aws-cdk/aws-sns @aws-cdk/aws-events @aws-cdk/aws-events-targets aws-cdk-lib @aws-cdk/core
+npm install --save-dev @types/node
 
 # CDK Bootstrap 
 aws configure 
@@ -54,7 +55,19 @@ npx cdk destroy DashboardStack-beta -c stage=beta --force
 npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
 npx cdk deploy DashboardStack-beta -c stage=beta --require-approval never
 
+npx cdk synth S3StaticWebsiteStack-beta -c stage=beta
+npx cdk deploy S3StaticWebsiteStack-beta -c stage=beta --require-approval never
+
+
 # follow deployspec-cdk.yml
  # Delete Depedent Stacks 
  # Deploy Dashboard ServiceStack
  # Deploy Service ServiceStack
+
+
+# Nexts
+ - next: push git commit 
+ - next: start to parse your 2 mock sites 
+ - next: add dynamodb 
+
+ 
