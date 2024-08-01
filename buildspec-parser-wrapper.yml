@@ -11,12 +11,12 @@ phases:
     commands:
       - echo "Packaging Wrapper Lambda Function"
       # Use the secondary sources
-      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/scrapefly/scrapefly_parser_wrapper.py scrapefly_parser_wrapper.py
+      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/parser_wrapper.py parser_wrapper.py
       # Generate a unique identifier (timestamp)
       - TIMESTAMP=$(date +%Y%m%d%H%M%S)
       # Create the zip file with the unique identifier
-      - ZIP_FILE="scrapefly_parser_wrapper_${TIMESTAMP}.zip"
-      - sudo zip -r $ZIP_FILE scrapefly_parser_wrapper.py
+      - ZIP_FILE="parser_wrapper_${TIMESTAMP}.zip"
+      - sudo zip -r $ZIP_FILE parser_wrapper.py
       - ls -lh
 
   post_build:

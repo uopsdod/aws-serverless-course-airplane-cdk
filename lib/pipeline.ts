@@ -125,7 +125,7 @@ export class PipelineStack extends cdk.Stack {
       outputs: [buildLayerOutput],
     });
 
-    // create Scrapefly Lambda Parser 
+    // create Lambda Parser 
     this.PARSER_ARTIFACT_SSM_KEY = '/lambda/packaging/buildParserOutputS3Location';
 
     const buildParserProject = new codebuild.PipelineProject(this, 'BuildParserProject', {
@@ -152,7 +152,7 @@ export class PipelineStack extends cdk.Stack {
       outputs: [buildParserOutput],
     });
 
-    // create Scrapefly Wrapper Lambda Parser 
+    // create Wrapper Lambda Parser 
     this.WRAPPER_PARSER_ARTIFACT_SSM_KEY = '/lambda/packaging/buildWraperParserOutputS3Location';
 
     const buildWrapperParserProject = new codebuild.PipelineProject(this, 'BuildWrapperParserProject', {

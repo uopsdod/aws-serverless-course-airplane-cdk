@@ -20,13 +20,13 @@ phases:
       - ls -al $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service
       - ls -al $CODEBUILD_SRC_DIR_sourceCdk
       - ls -al $CODEBUILD_SRC_DIR_sourceService
-      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/scrapefly/scrapefly_parser.py scrapefly_parser.py
-      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/scrapefly/utils.py utils.py
+      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/parser.py parser.py
+      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/utils.py utils.py
       # Generate a unique identifier (timestamp)
       - TIMESTAMP=$(date +%Y%m%d%H%M%S)
       # Create the zip file with the unique identifier
-      - ZIP_FILE="scrapefly_parser_${TIMESTAMP}.zip"
-      - sudo zip -r $ZIP_FILE scrapefly_parser.py utils.py
+      - ZIP_FILE="parser_${TIMESTAMP}.zip"
+      - sudo zip -r $ZIP_FILE parser.py utils.py
       - ls -lh
 
   post_build:

@@ -86,7 +86,7 @@ export class ServiceStack extends cdk.Stack {
     this.parserLambdaFunction = new lambda.Function(this, `parser_${suffix_tag}_${stage}`, {
       runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromBucket(existingBucket, buildParserOutputS3Location),
-      handler: 'scrapefly_parser.handler',
+      handler: 'parser.handler',
       role: lambdaRole,
       timeout: cdk.Duration.minutes(15),
       functionName: `parser_${suffix_tag}_${stage}`,
@@ -102,7 +102,7 @@ export class ServiceStack extends cdk.Stack {
     const wrapperFunction = new lambda.Function(this, `parser_wrapper_${suffix_tag}_${stage}`, {
       runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromBucket(existingBucket, buildWrapperParserOutputS3Location),
-      handler: 'scrapefly_parser_wrapper.handler',
+      handler: 'parser_wrapper.handler',
       role: lambdaRole,
       timeout: cdk.Duration.minutes(15),
       functionName: `parser_wrapper_${suffix_tag}_${stage}`,

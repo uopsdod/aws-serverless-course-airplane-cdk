@@ -15,13 +15,13 @@ phases:
       - mkdir -p layer/python
       - cp -r package/* layer/python/
       - cd layer
-      - zip -r ../scrapefly_parser_layer.zip .
+      - zip -r ../parser_layer.zip .
       - cd ..
 
   post_build:
     commands:
       - echo "Uploading zip to S3"
-      - aws s3 cp scrapefly_parser_layer.zip s3://$ARTIFACT_BUCKET/$LAYER_ARTIFACT_SSM_VALUE
+      - aws s3 cp parser_layer.zip s3://$ARTIFACT_BUCKET/$LAYER_ARTIFACT_SSM_VALUE
 
       - echo "Updating SSM Parameters"
       - aws ssm put-parameter --name $ARTIFACT_BUCKET_SSM_KEY --value $ARTIFACT_BUCKET --type String --overwrite

@@ -21,7 +21,7 @@ const stage = app.node.tryGetContext('stage') || 'dev';
 const suffix_random = generateRandomSuffix()
 const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
   STAGE: stage,
-  SUFFIX_TAG: "scrapefly",
+  SUFFIX_TAG: "serverless",
   SUFFIX_RANDOM: suffix_random,
   ARTIFACT_BUCKET_SSM_KEY: pipelineStack.ARTIFACT_BUCKET_SSM_KEY,
   LAYER_ARTIFACT_SSM_KEY: pipelineStack.LAYER_ARTIFACT_SSM_KEY,  
