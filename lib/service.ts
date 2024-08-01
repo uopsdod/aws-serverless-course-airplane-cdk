@@ -17,10 +17,8 @@ interface ServiceStackProps extends cdk.StackProps {
   LAYER_ARTIFACT_SSM_KEY: string;  
   PARSER_ARTIFACT_SSM_KEY: string;
   WRAPPER_PARSER_ARTIFACT_SSM_KEY: string;
-  INTEGTEST_ARTIFACT_SSM_KEY: string;
   SUFFIX_TAG: string;
   SUFFIX_RANDOM: string;
-  INTEGTEST_LAMBDA_FUNCTION_NAME_SSM_KEY: string;
 }
 
 
@@ -72,7 +70,6 @@ export class ServiceStack extends cdk.Stack {
     const buildLayerOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.LAYER_ARTIFACT_SSM_KEY);
     const buildParserOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.PARSER_ARTIFACT_SSM_KEY);
     const buildWrapperParserOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.WRAPPER_PARSER_ARTIFACT_SSM_KEY);
-    const buildIntegTestOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.INTEGTEST_ARTIFACT_SSM_KEY);
 
     // // S3 Bucket (Existing)
     // const artifactBucketName = 'lambdapackagingpipelinestac-artifactbucket7410c9ef-h1kxeqzibjpt';
@@ -123,28 +120,6 @@ export class ServiceStack extends cdk.Stack {
       batchSize: 1,
       enabled: true
     }));
-    // TODO: DLQ to help discard failed message
-
-    // IntegTest Lambda Function
-    const integTestFunction = new lambda.Function(this, `integtest-${suffix_tag}-${stage}`, {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      code: lambda.Code.fromBucket(existingBucket, buildIntegTestOutputS3Location),
-      handler: 'scrapefly_parser_integ_test.handler',
-      role: lambdaRole,
-      timeout: cdk.Duration.minutes(15),
-      functionName: `integtest-${suffix_tag}-${stage}`,
-      environment: {
-        TARGET_LAMBDA_NAME: this.parserLambdaFunction.functionName
-      }
-    });
-
-    // Store the Lambda function name in SSM Parameter Store
-    if (stage == 'beta') {
-      const ssmParameter = new ssm.StringParameter(this, 'IntegTestLambdaFunctionNameParameter', {
-        parameterName: props.INTEGTEST_LAMBDA_FUNCTION_NAME_SSM_KEY,
-        stringValue: integTestFunction.functionName,
-      });  
-    }
 
     // EventBridge Rule
     const rule = new events.Rule(this, `WeekdayScheduler-${suffix_tag}-${suffix_random}-${stage}`, {
