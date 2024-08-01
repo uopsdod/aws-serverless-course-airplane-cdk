@@ -49,23 +49,23 @@ export class ServiceStack extends cdk.Stack {
     });
 
     // SNS Topic
-    const topic = new sns.Topic(this, `BagAvailableNotification-${suffix_tag}-${stage}`, {
-      topicName: `bag_available_notification-${suffix_tag}-${stage}`,
+    const topic = new sns.Topic(this, `sns-for-best-plane-ticket-${suffix_tag}-${stage}`, {
+      topicName: `sns-for-best-plane-ticket-${suffix_tag}-${stage}`,
     });
 
     // SQS for wrapper and parser 
     // Create the SQS queue
-    const queue = new sqs.Queue(this, `sqs-for-best-plane-ticket-${suffix_tag}-${suffix_random}-${stage}`, {
-      queueName: `sqs-for-best-plane-ticket-${suffix_tag}-${suffix_random}-${stage}`,
-      visibilityTimeout: cdk.Duration.minutes(15), // must >= lambda timeout setting
-      retentionPeriod: cdk.Duration.days(1)
-    });
+    // const queue = new sqs.Queue(this, `sqs-for-best-plane-ticket-${suffix_tag}-${suffix_random}-${stage}`, {
+    //   queueName: `sqs-for-best-plane-ticket-${suffix_tag}-${suffix_random}-${stage}`,
+    //   visibilityTimeout: cdk.Duration.minutes(15), // must >= lambda timeout setting
+    //   retentionPeriod: cdk.Duration.days(1)
+    // });
 
     // Grant send permission to the role
-    queue.grantSendMessages(lambdaRole);
+    // queue.grantSendMessages(lambdaRole);
 
     // Grant receive and delete permissions to the role
-    queue.grantConsumeMessages(lambdaRole);
+    // queue.grantConsumeMessages(lambdaRole);
 
     // Read parameters from SSM Parameter Store
     const artifactBucketName = ssm.StringParameter.valueForStringParameter(this, props.ARTIFACT_BUCKET_SSM_KEY);
@@ -113,7 +113,7 @@ export class ServiceStack extends cdk.Stack {
         TARGET_LAMBDA_NAME: this.parserLambdaFunction.functionName,
         S3_BUCKET_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping-12938u9120837091283',
         S3_FILE_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping - file.csv',
-        SQS_URL_FOR_BAG_LINK_TO_CHECK: queue.queueUrl,
+        SNS_TOPIC_ARN: topic.topicArn,
         APPLE_WEBSITE_URL: props.APPLE_WEBSITE_URL,
         BANANA_WEBSITE_URL: props.BANANA_WEBSITE_URL,
       }
