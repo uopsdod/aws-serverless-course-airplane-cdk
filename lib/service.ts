@@ -19,8 +19,8 @@ interface ServiceStackProps extends cdk.StackProps {
   WRAPPER_PARSER_ARTIFACT_SSM_KEY: string;
   SUFFIX_TAG: string;
   SUFFIX_RANDOM: string;
-  APPLE_WEBSITE_URL: string;
-  BANANA_WEBSITE_URL: string;
+  // APPLE_WEBSITE_URL: string;
+  // BANANA_WEBSITE_URL: string;
 }
 
 
@@ -77,6 +77,9 @@ export class ServiceStack extends cdk.Stack {
     // const artifactBucketName = 'lambdapackagingpipelinestac-artifactbucket7410c9ef-h1kxeqzibjpt';
     const existingBucket = s3.Bucket.fromBucketName(this, 'ExistingBucket', artifactBucketName);
 
+    const appleWebsiteUrl = ssm.StringParameter.valueForStringParameter(this, `/myapp/appleWebsiteUrl`);
+    const bananaWebsiteUrl = ssm.StringParameter.valueForStringParameter(this, `/myapp/bananaWebsiteUrl`);    
+
     // Lambda Layer
     const layer = new lambda.LayerVersion(this, `ParserDependencyLayer-${suffix_tag}-${suffix_random}-${stage}`, {
       code: lambda.Code.fromBucket(existingBucket, buildLayerOutputS3Location),
@@ -96,7 +99,7 @@ export class ServiceStack extends cdk.Stack {
       environment: {
         SNS_TOPIC_ARN: topic.topicArn,
         STAGE: stage,
-        SQS_URL_FOR_BAG_LINK_TO_CHECK: queue.queueUrl,
+        // SQS_URL_FOR_BAG_LINK_TO_CHECK: queue.queueUrl,
       }
     });
 
@@ -114,8 +117,8 @@ export class ServiceStack extends cdk.Stack {
         S3_BUCKET_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping-12938u9120837091283',
         S3_FILE_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping - file.csv',
         SNS_TOPIC_ARN: topic.topicArn,
-        APPLE_WEBSITE_URL: props.APPLE_WEBSITE_URL,
-        BANANA_WEBSITE_URL: props.BANANA_WEBSITE_URL,
+        APPLE_WEBSITE_URL: appleWebsiteUrl,
+        BANANA_WEBSITE_URL: bananaWebsiteUrl,
       }
     });
 

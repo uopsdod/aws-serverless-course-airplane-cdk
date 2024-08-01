@@ -5,6 +5,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 interface S3StaticWebsiteProps extends cdk.StackProps {
   SUFFIX_RANDOM: string;
@@ -61,5 +62,16 @@ export class S3StaticWebsiteStack extends Stack {
       value: bucket5Rows.bucketWebsiteUrl,
       description: `URL for the 5-row flight prices website - ${suffix}`,
     });
+
+    // Create SSM parameters
+    new ssm.StringParameter(this, `AppleWebsiteUrlParameter`, {
+      parameterName: `/myapp/appleWebsiteUrl`,
+      stringValue: this.appleWebsiteUrl,
+    });
+
+    new ssm.StringParameter(this, `BananaWebsiteUrlParameter`, {
+      parameterName: `/myapp/bananaWebsiteUrl`,
+      stringValue: this.bananaWebsiteUrl,
+    });    
   }
 }

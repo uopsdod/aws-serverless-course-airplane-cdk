@@ -36,8 +36,8 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
   LAYER_ARTIFACT_SSM_KEY: pipelineStack.LAYER_ARTIFACT_SSM_KEY,  
   PARSER_ARTIFACT_SSM_KEY: pipelineStack.PARSER_ARTIFACT_SSM_KEY,
   WRAPPER_PARSER_ARTIFACT_SSM_KEY: pipelineStack.WRAPPER_PARSER_ARTIFACT_SSM_KEY,
-  APPLE_WEBSITE_URL: s3StaticWebsiteStack.appleWebsiteUrl,
-  BANANA_WEBSITE_URL: s3StaticWebsiteStack.bananaWebsiteUrl,
+  // APPLE_WEBSITE_URL: s3StaticWebsiteStack.appleWebsiteUrl,
+  // BANANA_WEBSITE_URL: s3StaticWebsiteStack.bananaWebsiteUrl,
   env: {
     account: accountId,
     region: region
