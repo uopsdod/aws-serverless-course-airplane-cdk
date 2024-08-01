@@ -1,0 +1,159 @@
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
+
+interface ServiceStackProps extends cdk.StackProps {
+  STAGE: string;
+  ARTIFACT_BUCKET_SSM_KEY: string;
+  LAYER_ARTIFACT_SSM_KEY: string;  
+  PARSER_ARTIFACT_SSM_KEY: string;
+  WRAPPER_PARSER_ARTIFACT_SSM_KEY: string;
+  INTEGTEST_ARTIFACT_SSM_KEY: string;
+  SUFFIX_TAG: string;
+  SUFFIX_RANDOM: string;
+  INTEGTEST_LAMBDA_FUNCTION_NAME_SSM_KEY: string;
+}
+
+
+
+export class ServiceStack extends cdk.Stack {
+  public readonly parserLambdaFunction: lambda.Function;
+  constructor(scope: Construct, id: string, props: ServiceStackProps) {
+    super(scope, id, props);
+
+    const suffix_tag = props.SUFFIX_TAG
+    const suffix_random = props.SUFFIX_RANDOM
+    const stage = props.STAGE
+
+    // IAM Role for Lambda
+    const lambdaRole = new iam.Role(this, `ParserLambdaRole-${suffix_tag}-${stage}`, {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSNSFullAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSQSFullAccess'),
+      ],
+      roleName: `parser-lambda-role-${suffix_tag}-${stage}`,
+    });
+
+    // SNS Topic
+    const topic = new sns.Topic(this, `BagAvailableNotification-${suffix_tag}-${stage}`, {
+      topicName: `bag_available_notification-${suffix_tag}-${stage}`,
+    });
+
+    // SQS for wrapper and parser 
+    // Create the SQS queue
+    const queue = new sqs.Queue(this, `sqs-for-bag-link-to-check-${suffix_tag}-${suffix_random}-${stage}`, {
+      queueName: `sqs-for-bag-link-to-check-${suffix_tag}-${suffix_random}-${stage}`,
+      visibilityTimeout: cdk.Duration.minutes(15), // must >= lambda timeout setting
+      retentionPeriod: cdk.Duration.days(1)
+    });
+
+    // Grant send permission to the role
+    queue.grantSendMessages(lambdaRole);
+
+    // Grant receive and delete permissions to the role
+    queue.grantConsumeMessages(lambdaRole);
+
+    // Read parameters from SSM Parameter Store
+    const artifactBucketName = ssm.StringParameter.valueForStringParameter(this, props.ARTIFACT_BUCKET_SSM_KEY);
+    const buildLayerOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.LAYER_ARTIFACT_SSM_KEY);
+    const buildParserOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.PARSER_ARTIFACT_SSM_KEY);
+    const buildWrapperParserOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.WRAPPER_PARSER_ARTIFACT_SSM_KEY);
+    const buildIntegTestOutputS3Location = ssm.StringParameter.valueForStringParameter(this, props.INTEGTEST_ARTIFACT_SSM_KEY);
+
+    // // S3 Bucket (Existing)
+    // const artifactBucketName = 'lambdapackagingpipelinestac-artifactbucket7410c9ef-h1kxeqzibjpt';
+    const existingBucket = s3.Bucket.fromBucketName(this, 'ExistingBucket', artifactBucketName);
+
+    // Lambda Layer
+    const layer = new lambda.LayerVersion(this, `ParserDependencyLayer-${suffix_tag}-${suffix_random}-${stage}`, {
+      code: lambda.Code.fromBucket(existingBucket, buildLayerOutputS3Location),
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_12],
+      description: `Parser Dependency Layer ${suffix_tag}`,
+    });
+
+    // Lambda Function
+    this.parserLambdaFunction = new lambda.Function(this, `parser_${suffix_tag}_${stage}`, {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      code: lambda.Code.fromBucket(existingBucket, buildParserOutputS3Location),
+      handler: 'scrapefly_parser.handler',
+      role: lambdaRole,
+      timeout: cdk.Duration.minutes(15),
+      functionName: `parser_${suffix_tag}_${stage}`,
+      layers: [layer],
+      environment: {
+        SNS_TOPIC_ARN: topic.topicArn,
+        STAGE: stage,
+        SQS_URL_FOR_BAG_LINK_TO_CHECK: queue.queueUrl,
+      }
+    });
+
+    // Wrapper Lambda Function
+    const wrapperFunction = new lambda.Function(this, `parser_wrapper_${suffix_tag}_${stage}`, {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      code: lambda.Code.fromBucket(existingBucket, buildWrapperParserOutputS3Location),
+      handler: 'scrapefly_parser_wrapper.handler',
+      role: lambdaRole,
+      timeout: cdk.Duration.minutes(15),
+      functionName: `parser_wrapper_${suffix_tag}_${stage}`,
+      layers: [layer],
+      environment: {
+        TARGET_LAMBDA_NAME: this.parserLambdaFunction.functionName,
+        S3_BUCKET_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping-12938u9120837091283',
+        S3_FILE_NAME_PLAN_BAG_MAPPING: 'plan-bag-mapping - file.csv',
+        SQS_URL_FOR_BAG_LINK_TO_CHECK: queue.queueUrl,
+      }
+    });
+
+    // Add SQS queue as an event source to the Lambda function
+    this.parserLambdaFunction.addEventSource(new lambdaEventSources.SqsEventSource(queue, {
+      batchSize: 1,
+      enabled: true
+    }));
+    // TODO: DLQ to help discard failed message
+
+    // IntegTest Lambda Function
+    const integTestFunction = new lambda.Function(this, `integtest-${suffix_tag}-${stage}`, {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      code: lambda.Code.fromBucket(existingBucket, buildIntegTestOutputS3Location),
+      handler: 'scrapefly_parser_integ_test.handler',
+      role: lambdaRole,
+      timeout: cdk.Duration.minutes(15),
+      functionName: `integtest-${suffix_tag}-${stage}`,
+      environment: {
+        TARGET_LAMBDA_NAME: this.parserLambdaFunction.functionName
+      }
+    });
+
+    // Store the Lambda function name in SSM Parameter Store
+    if (stage == 'beta') {
+      const ssmParameter = new ssm.StringParameter(this, 'IntegTestLambdaFunctionNameParameter', {
+        parameterName: props.INTEGTEST_LAMBDA_FUNCTION_NAME_SSM_KEY,
+        stringValue: integTestFunction.functionName,
+      });  
+    }
+
+    // EventBridge Rule
+    const rule = new events.Rule(this, `WeekdayScheduler-${suffix_tag}-${suffix_random}-${stage}`, {
+      schedule: events.Schedule.cron({ minute: '*/5', hour: '13-18', weekDay: 'MON-FRI' }),
+      ruleName: `weekday-scheduler-${suffix_tag}-${suffix_random}-${stage}`,
+      description: `weekday-scheduler-${suffix_tag}-${suffix_random}-${stage}`,
+      enabled: ((stage == 'beta')?false:true)
+    });
+
+    rule.addTarget(new targets.LambdaFunction(wrapperFunction));
+  }
+}

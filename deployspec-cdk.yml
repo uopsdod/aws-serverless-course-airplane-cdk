@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+      nodejs: 18
+    commands:
+      - echo "Installing dependencies"
+      - npm install aws-cdk-lib constructs typescript
+  build:
+    commands:
+      - echo "Getting Stage Environment Variable"
+      - stage=$STAGE
+      - echo "Synthesizing Service Stack"
+      - npx cdk synth ServiceStack-$stage -c stage=$stage
+      - echo "Synthesizing Dashboard Stack"
+      - npx cdk synth DashboardStack-$stage -c stage=$stage
+  post_build:
+    commands:
+      - echo "Deploying Service via CDK"
+      - npx cdk destroy DashboardStack-$stage -c stage=$stage --force
+      # - npx cdk deploy ServiceStack-$stage -c stage=$stage --require-approval never
+      - npx cdk deploy DashboardStack-$stage -c stage=$stage --require-approval never # this deploys ServiceStack as a dependency of DashboardStack 
+cache:
+  paths:
+    - '/root/.npm'
+    - 'node_modules/**/*'

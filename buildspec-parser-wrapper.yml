@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing dependencies"
+
+  build:
+    commands:
+      - echo "Packaging Wrapper Lambda Function"
+      # Use the secondary sources
+      - cp $CODEBUILD_SRC_DIR_Artifact_Source_GitHub_Source_Service/scrapefly/scrapefly_parser_wrapper.py scrapefly_parser_wrapper.py
+      # Generate a unique identifier (timestamp)
+      - TIMESTAMP=$(date +%Y%m%d%H%M%S)
+      # Create the zip file with the unique identifier
+      - ZIP_FILE="scrapefly_parser_wrapper_${TIMESTAMP}.zip"
+      - sudo zip -r $ZIP_FILE scrapefly_parser_wrapper.py
+      - ls -lh
+
+  post_build:
+    commands:
+      - echo "Uploading zip to S3"
+      - aws s3 cp $ZIP_FILE s3://$ARTIFACT_BUCKET/$ZIP_FILE
+
+      - echo "Updating SSM Parameters"
+      - aws ssm put-parameter --name $ARTIFACT_BUCKET_SSM_KEY --value $ARTIFACT_BUCKET --type String --overwrite
+      - aws ssm put-parameter --name $WRAPPER_PARSER_ARTIFACT_SSM_KEY --value $ZIP_FILE --type String --overwrite
+      
