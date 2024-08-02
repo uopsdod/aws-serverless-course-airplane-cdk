@@ -40,8 +40,6 @@ cdk bootstrap
  - change githubOwner = 'YourGithubOwner';
 
 # Deploy Pipeline Stack  
-cdk synth PipelineStack
-
 $SECRET_ARN=XXXXX
 $GITHUB_OWNER=XXXXX
 cdk deploy PipelineStack --require-approval never\
