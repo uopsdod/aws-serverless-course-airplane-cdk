@@ -51,10 +51,13 @@ cdk deploy PipelineStack --require-approval never
 # Deploy beta 
 npx cdk synth S3StaticWebsiteStack-beta -c stage=beta
 npx cdk synth ServiceStack-beta -c stage=beta
+npx cdk synth DynamoDBStack-beta -c stage=beta
 
 npx cdk destroy ServiceStack-beta -f
 npx cdk destroy S3StaticWebsiteStack-beta -f
+npx cdk destroy DynamoDBStack-beta -f
 
+npx cdk deploy DynamoDBStack-beta -c stage=beta --require-approval never
 npx cdk deploy S3StaticWebsiteStack-beta -c stage=beta --require-approval never
 npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
 

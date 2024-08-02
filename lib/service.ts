@@ -44,6 +44,7 @@ export class ServiceStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess'),
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSQSFullAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'),
       ],
       roleName: `parser-lambda-role-${suffix_tag}-${stage}`,
     });
@@ -79,6 +80,7 @@ export class ServiceStack extends cdk.Stack {
 
     const appleWebsiteUrl = ssm.StringParameter.valueForStringParameter(this, `/myapp/appleWebsiteUrl`);
     const bananaWebsiteUrl = ssm.StringParameter.valueForStringParameter(this, `/myapp/bananaWebsiteUrl`);    
+    const flightPricesTableName = ssm.StringParameter.valueForStringParameter(this, `/myapp/flightPricesTableName`);
 
     // Lambda Layer
     const layer = new lambda.LayerVersion(this, `ParserDependencyLayer-${suffix_tag}-${suffix_random}-${stage}`, {
@@ -119,6 +121,7 @@ export class ServiceStack extends cdk.Stack {
         SNS_TOPIC_ARN: topic.topicArn,
         APPLE_WEBSITE_URL: appleWebsiteUrl,
         BANANA_WEBSITE_URL: bananaWebsiteUrl,
+        DDB_TABLE_NAME: flightPricesTableName,
       }
     });
 

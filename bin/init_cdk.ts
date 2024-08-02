@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { ServiceStack } from '../lib/service';
 import { PipelineStack } from '../lib/pipeline';
 import { S3StaticWebsiteStack } from '../lib/s3-static-website-stack';
+import { DynamoDBStack } from '../lib/ddb-report';
 
 const accountId = '659104334423';
 const region = 'us-east-1';
@@ -43,6 +44,15 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
     region: region
   }
 });
+
+const dynamoDBStack = new DynamoDBStack(app, `DynamoDBStack-${stage}`, {
+  SUFFIX_RANDOM: suffix_random,
+  env: {
+    account: accountId,
+    region: region
+  }
+});
+
 
 function generateRandomSuffix() {
   return Math.random().toString(36).substring(2, 8);
