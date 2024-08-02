@@ -152,7 +152,9 @@ export class PipelineStack extends cdk.Stack {
       },
       role: codeBuildRole,
       environmentVariables: {
-        STAGE: { value: 'beta' }
+        STAGE: { value: 'beta' },
+        SECRET_ARN: { value: secretArn },
+        GITHUB_OWNER: { value: githubOwner },
       },
     });
 
