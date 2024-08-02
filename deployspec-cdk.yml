@@ -13,11 +13,11 @@ phases:
       - echo "Getting Stage Environment Variable"
       - stage=$STAGE
       - echo "Synthesizing Service Stack"
-      - npx cdk synth ServiceStack-$stage -c stage=$stage
+      - npx cdk synth ServiceStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
       - echo "Synthesizing S3StaticWebsiteStack Stack"
-      - npx cdk synth S3StaticWebsiteStack-$stage -c stage=$stage
+      - npx cdk synth S3StaticWebsiteStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
       - echo "Synthesizing DynamoDBStack Stack"
-      - npx cdk synth DynamoDBStack-$stage -c stage=$stage
+      - npx cdk synth DynamoDBStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
   post_build:
     commands:
       - echo "Deploying Service via CDK"
