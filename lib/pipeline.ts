@@ -32,6 +32,7 @@ export class PipelineStack extends cdk.Stack {
     // Reference the existing secret from AWS Secrets Manager
     const secretArn = this.node.tryGetContext('secretArn');
     const githubOwner = this.node.tryGetContext('githubOwner');
+    const accountId = this.node.tryGetContext('accountId') || 'undefined';
     const githubRepo = 'aws-serverless-course-airplane'
     const githubRepoCdk = 'aws-serverless-course-airplane-cdk'
 
@@ -155,6 +156,7 @@ export class PipelineStack extends cdk.Stack {
         STAGE: { value: 'beta' },
         SECRET_ARN: { value: secretArn },
         GITHUB_OWNER: { value: githubOwner },
+        ACCOUNT_ID: { value: accountId },
       },
     });
 

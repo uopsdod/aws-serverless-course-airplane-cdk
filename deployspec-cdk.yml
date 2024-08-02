@@ -15,17 +15,17 @@ phases:
       - echo "Synthesizing Service Stack"
       - echo $SECRET_ARN
       - echo $GITHUB_OWNER
-      - npx cdk synth ServiceStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
+      - npx cdk synth ServiceStack-$stage -c stage=$stage -c accountId=$ACCOUNT_ID -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
       - echo "Synthesizing S3StaticWebsiteStack Stack"
-      - npx cdk synth S3StaticWebsiteStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
+      - npx cdk synth S3StaticWebsiteStack-$stage -c stage=$stage -c accountId=$ACCOUNT_ID -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
       - echo "Synthesizing DynamoDBStack Stack"
-      - npx cdk synth DynamoDBStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
+      - npx cdk synth DynamoDBStack-$stage -c stage=$stage -c accountId=$ACCOUNT_ID -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER 
   post_build:
     commands:
       - echo "Deploying Service via CDK"
-      - npx cdk deploy DynamoDBStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER --require-approval never
-      - npx cdk deploy S3StaticWebsiteStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER --require-approval never
-      - npx cdk deploy ServiceStack-$stage -c stage=$stage -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER --require-approval never
+      - npx cdk deploy DynamoDBStack-$stage -c stage=$stage -c accountId=$ACCOUNT_ID -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER --require-approval never
+      - npx cdk deploy S3StaticWebsiteStack-$stage -c stage=$stage -c accountId=$ACCOUNT_ID -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER --require-approval never
+      - npx cdk deploy ServiceStack-$stage -c stage=$stage -c accountId=$ACCOUNT_ID -c secretArn=$SECRET_ARN -c githubOwner=$GITHUB_OWNER --require-approval never
 cache:
   paths:
     - '/root/.npm'
