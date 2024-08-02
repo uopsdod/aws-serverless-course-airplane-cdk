@@ -3,7 +3,6 @@ import { Construct } from 'constructs';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -16,6 +15,7 @@ export class PipelineStack extends cdk.Stack {
   public readonly LAYER_ARTIFACT_SSM_KEY: string;
   public readonly PARSER_ARTIFACT_SSM_KEY: string;
   public readonly WRAPPER_PARSER_ARTIFACT_SSM_KEY: string;
+  public readonly REPORT_ARTIFACT_SSM_KEY: string;
   public readonly INTEGTEST_ARTIFACT_SSM_KEY: string;  
   public readonly INTEGTEST_LAMBDA_FUNCTION_NAME_SSM_KEY: string;  
   
@@ -101,83 +101,47 @@ export class PipelineStack extends cdk.Stack {
     this.ARTIFACT_BUCKET_SSM_KEY = '/lambda/packaging/artifactBucketName';
     this.LAYER_ARTIFACT_SSM_KEY = '/lambda/packaging/buildLayerOutputS3Location';
 
-    const buildLayerProject = new codebuild.PipelineProject(this, 'BuildLayerProject', {
-      buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec-layer.yml'),
-      environment: {
-        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
-        privileged: true,
-      },
-      role: codeBuildRole,
-      environmentVariables: {
-        ARTIFACT_BUCKET: { value: artifactBucket.bucketName },
-        ARTIFACT_BUCKET_SSM_KEY: { value: this.ARTIFACT_BUCKET_SSM_KEY},
-        ARTIFACT_BUCKET_SSM_VALUE: { value: artifactBucket.bucketName},
-        LAYER_ARTIFACT_SSM_KEY: { value: this.LAYER_ARTIFACT_SSM_KEY},
-        LAYER_ARTIFACT_SSM_VALUE: { value: 'parser_layer.zip'},
-      },
-    });
-
     const buildLayerOutput = new codepipeline.Artifact();
-    const buildLayerAction = new codepipeline_actions.CodeBuildAction({
-      actionName: 'Build_Layer',
-      project: buildLayerProject,
-      input: sourceCDKOutput,
-      outputs: [buildLayerOutput],
+    const buildLayerAction = this.createBuildAction('BuildLayerProject', 'buildspec-layer.yml', buildLayerOutput, sourceCDKOutput, codeBuildRole, {
+      ARTIFACT_BUCKET: artifactBucket.bucketName,
+      ARTIFACT_BUCKET_SSM_KEY: this.ARTIFACT_BUCKET_SSM_KEY,
+      ARTIFACT_BUCKET_SSM_VALUE: artifactBucket.bucketName,
+      LAYER_ARTIFACT_SSM_KEY: this.LAYER_ARTIFACT_SSM_KEY,
+      LAYER_ARTIFACT_SSM_VALUE: 'parser_layer.zip',
     });
 
     // create Lambda Parser 
     this.PARSER_ARTIFACT_SSM_KEY = '/lambda/packaging/buildParserOutputS3Location';
 
-    const buildParserProject = new codebuild.PipelineProject(this, 'BuildParserProject', {
-      buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec-parser.yml'), 
-      environment: {
-        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
-        privileged: true,
-      },
-      role: codeBuildRole,
-      environmentVariables: {
-        ARTIFACT_BUCKET: { value: artifactBucket.bucketName },
-        ARTIFACT_BUCKET_SSM_KEY: { value: this.ARTIFACT_BUCKET_SSM_KEY},
-        ARTIFACT_BUCKET_SSM_VALUE: { value: artifactBucket.bucketName},
-        PARSER_ARTIFACT_SSM_KEY: { value: this.PARSER_ARTIFACT_SSM_KEY},
-      },
-    });
-
     const buildParserOutput = new codepipeline.Artifact();
-    const buildParserAction = new codepipeline_actions.CodeBuildAction({
-      actionName: 'Build_Parser',
-      project: buildParserProject,
-      input: sourceCDKOutput,
-      extraInputs: [sourceServiceOutput],
-      outputs: [buildParserOutput],
-    });
+    const buildParserAction = this.createBuildAction('BuildParserProject', 'buildspec-parser.yml', buildParserOutput, sourceCDKOutput, codeBuildRole, {
+      ARTIFACT_BUCKET: artifactBucket.bucketName,
+      ARTIFACT_BUCKET_SSM_KEY: this.ARTIFACT_BUCKET_SSM_KEY,
+      ARTIFACT_BUCKET_SSM_VALUE: artifactBucket.bucketName,
+      PARSER_ARTIFACT_SSM_KEY: this.PARSER_ARTIFACT_SSM_KEY,
+    }, [sourceServiceOutput]);
 
     // create Wrapper Lambda Parser 
     this.WRAPPER_PARSER_ARTIFACT_SSM_KEY = '/lambda/packaging/buildWraperParserOutputS3Location';
 
-    const buildWrapperParserProject = new codebuild.PipelineProject(this, 'BuildWrapperParserProject', {
-      buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec-parser-wrapper.yml'),  
-      environment: {
-        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
-        privileged: true,
-      },
-      role: codeBuildRole,
-      environmentVariables: {
-        ARTIFACT_BUCKET: { value: artifactBucket.bucketName },
-        ARTIFACT_BUCKET_SSM_KEY: { value: this.ARTIFACT_BUCKET_SSM_KEY},
-        ARTIFACT_BUCKET_SSM_VALUE: { value: artifactBucket.bucketName},
-        WRAPPER_PARSER_ARTIFACT_SSM_KEY: { value: this.WRAPPER_PARSER_ARTIFACT_SSM_KEY},
-      },
-    });
-
     const buildWrapperParserOutput = new codepipeline.Artifact();
-    const buildWrapperParserAction = new codepipeline_actions.CodeBuildAction({
-      actionName: 'Build_Wrapper_Parser',
-      project: buildWrapperParserProject,
-      input: sourceCDKOutput,
-      extraInputs: [sourceServiceOutput],
-      outputs: [buildWrapperParserOutput],
-    });
+    const buildWrapperParserAction = this.createBuildAction('BuildWrapperParserProject', 'buildspec-parser-wrapper.yml', buildWrapperParserOutput, sourceCDKOutput, codeBuildRole, {
+      ARTIFACT_BUCKET: artifactBucket.bucketName,
+      ARTIFACT_BUCKET_SSM_KEY: this.ARTIFACT_BUCKET_SSM_KEY,
+      ARTIFACT_BUCKET_SSM_VALUE: artifactBucket.bucketName,
+      WRAPPER_PARSER_ARTIFACT_SSM_KEY: this.WRAPPER_PARSER_ARTIFACT_SSM_KEY,
+    }, [sourceServiceOutput]);
+
+    // create Report Lambda  
+    this.REPORT_ARTIFACT_SSM_KEY = '/lambda/packaging/buildReportOutputS3Location';
+
+    const buildReportOutput = new codepipeline.Artifact();
+    const buildReportAction = this.createBuildAction('BuildReportProject', 'buildspec-report.yml', buildReportOutput, sourceCDKOutput, codeBuildRole, {
+      ARTIFACT_BUCKET: artifactBucket.bucketName,
+      ARTIFACT_BUCKET_SSM_KEY: this.ARTIFACT_BUCKET_SSM_KEY,
+      ARTIFACT_BUCKET_SSM_VALUE: artifactBucket.bucketName,
+      REPORT_ARTIFACT_SSM_KEY: this.REPORT_ARTIFACT_SSM_KEY,
+    }, [sourceServiceOutput]);
 
     // deploy - beta
     const deployProjectBeta = new codebuild.PipelineProject(this, 'deployProjectBeta', {
@@ -211,18 +175,50 @@ export class PipelineStack extends cdk.Stack {
         {
           stageName: 'Build',
           actions: [
-            buildLayerAction
-            , buildParserAction
-            , buildWrapperParserAction
+            buildLayerAction,
+            buildParserAction,
+            buildWrapperParserAction,
+            buildReportAction,
           ],
-        },{
+        },
+        {
           stageName: 'Deploy-Beta',
           actions: [
-            deployCDKActionBeta
+            deployCDKActionBeta,
           ],
-        }
+        },
       ],
     });
+  }
 
+  private createBuildAction(
+    projectName: string,
+    buildSpecFilename: string,
+    outputArtifact: codepipeline.Artifact,
+    inputArtifact: codepipeline.Artifact,
+    role: iam.Role,
+    environmentVariables: { [key: string]: string },
+    extraInputs: codepipeline.Artifact[] = []
+  ): codepipeline_actions.CodeBuildAction {
+    const project = new codebuild.PipelineProject(this, projectName, {
+      buildSpec: codebuild.BuildSpec.fromSourceFilename(buildSpecFilename),
+      environment: {
+        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
+        privileged: true,
+      },
+      role,
+      environmentVariables: Object.entries(environmentVariables).reduce((acc, [key, value]) => {
+        acc[key] = { value };
+        return acc;
+      }, {} as { [key: string]: codebuild.BuildEnvironmentVariable }),
+    });
+
+    return new codepipeline_actions.CodeBuildAction({
+      actionName: projectName,
+      project,
+      input: inputArtifact,
+      extraInputs,
+      outputs: [outputArtifact],
+    });
   }
 }
