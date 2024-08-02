@@ -5,6 +5,7 @@ import { ServiceStack } from '../lib/service';
 import { PipelineStack } from '../lib/pipeline';
 import { S3StaticWebsiteStack } from '../lib/s3-static-website-stack';
 import { DynamoDBStack } from '../lib/ddb-report';
+// import { QueryDynamoDBStack } from '../lib/api-report';
 
 const accountId = '659104334423';
 const region = 'us-east-1';
@@ -47,11 +48,20 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${stage}`, {
 
 const dynamoDBStack = new DynamoDBStack(app, `DynamoDBStack-${stage}`, {
   SUFFIX_RANDOM: suffix_random,
+  ARTIFACT_BUCKET_SSM_KEY: pipelineStack.ARTIFACT_BUCKET_SSM_KEY,
+  REPORT_ARTIFACT_SSM_KEY: pipelineStack.REPORT_ARTIFACT_SSM_KEY,
   env: {
     account: accountId,
     region: region
   }
 });
+
+// const queryDynamoDBStack = new QueryDynamoDBStack(app, `QueryDynamoDBStack-${stage}`, {
+//   env: {
+//     account: accountId,
+//     region: region
+//   }
+// });
 
 
 function generateRandomSuffix() {
