@@ -74,6 +74,7 @@ export class DynamoDBStack extends Stack {
 
     const getDateIntegration = new apigateway.LambdaIntegration(queryLambda);
 
+    // sample api: https://ay0e083p0m.execute-api.us-east-1.amazonaws.com/prod?date=2024-08-02
     api.root.addMethod('GET', getDateIntegration, {
         requestParameters: {
             'method.request.querystring.date': true,

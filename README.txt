@@ -47,6 +47,7 @@ cdk synth PipelineStack
 cdk deploy PipelineStack --require-approval never
 
 # Trigger Pipeline
+- this includes building the ssm key for the first time 
 
 # Deploy beta 
 npx cdk synth S3StaticWebsiteStack-beta -c stage=beta
@@ -66,6 +67,8 @@ npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
  # Deploy Dashboard ServiceStack
  # Deploy Service ServiceStack
 
+# invoke report API to see the current report 
+- example url: https://ay0e083p0m.execute-api.us-east-1.amazonaws.com/prod?date=2024-08-02
 
 # Nexts
  - [DONE] push git commit 
