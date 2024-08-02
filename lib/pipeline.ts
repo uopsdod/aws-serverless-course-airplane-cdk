@@ -30,8 +30,8 @@ export class PipelineStack extends cdk.Stack {
     // Find the github-token Secret: Open the secret and click on "Retrieve secret value".
     // Edit the Secret: Click "Edit" and add the GitHub token in the JSON structure, e.g., {"token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"}.
     // Reference the existing secret from AWS Secrets Manager
-    const secretArn = 'arn:aws:secretsmanager:us-east-1:659104334423:secret:github-token-for-aws-serverless-course-airplane-UmmGxQ';
-    const githubOwner = 'uopsdod'
+    const secretArn = this.node.tryGetContext('secretArn');
+    const githubOwner = this.node.tryGetContext('githubOwner');
     const githubRepo = 'aws-serverless-course-airplane'
     const githubRepoCdk = 'aws-serverless-course-airplane-cdk'
 

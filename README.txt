@@ -21,10 +21,6 @@ pwd:
 - Key/value pairs: Use "token" as the key and paste your GitHub personal access token as the value.
 - Descriptive Secret name: "github-token-for-aws-serverless-course-airplane"
 
-# 修改 pipeline.ts 
- - const secretArn = 'YourAwsScretArn';
- - change githubOwner = 'YourGithubOwner';
-
 # Install AWS CDK CLI
 npm install -g aws-cdk
 
@@ -40,9 +36,18 @@ npm install --save-dev @types/node
 aws configure 
 cdk bootstrap
 
+# 修改 pipeline.ts 
+ - const secretArn = 'YourAwsScretArn';
+ - change githubOwner = 'YourGithubOwner';
+
 # Deploy Pipeline Stack  
 cdk synth PipelineStack
-cdk deploy PipelineStack --require-approval never
+
+$SECRET_ARN=XXXXX
+$GITHUB_OWNER=XXXXX
+cdk deploy PipelineStack --require-approval never\
+ -c secretArn=$SECRET_ARN \
+ -c githubOwner=$GITHUB_OWNER
 
 # Trigger Pipeline
 - this includes building the ssm key for the first time 
