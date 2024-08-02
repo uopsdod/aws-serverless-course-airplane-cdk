@@ -133,11 +133,11 @@ export class ServiceStack extends cdk.Stack {
     // }));
 
     // EventBridge Rule
-    const rule = new events.Rule(this, `WeekdayScheduler-${suffix_tag}-${suffix_random}-${stage}`, {
-      schedule: events.Schedule.cron({ minute: '*/5', hour: '13-18', weekDay: 'MON-FRI' }),
-      ruleName: `weekday-scheduler-${suffix_tag}-${suffix_random}-${stage}`,
-      description: `weekday-scheduler-${suffix_tag}-${suffix_random}-${stage}`,
-      enabled: ((stage == 'beta')?false:true)
+    const rule = new events.Rule(this, `MinuteScheduler-${suffix_tag}-${suffix_random}-${stage}`, {
+      schedule: events.Schedule.cron({ minute: '*', hour: '*', day: '*', month: '*', year: '*' }),
+      ruleName: `minute-scheduler-${suffix_tag}-${suffix_random}-${stage}`,
+      description: `minute-scheduler-${suffix_tag}-${suffix_random}-${stage}`,
+      enabled: false
     });
 
     rule.addTarget(new targets.LambdaFunction(wrapperFunction));

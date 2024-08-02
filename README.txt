@@ -25,8 +25,6 @@ pwd:
  - const secretArn = 'YourAwsScretArn';
  - change githubOwner = 'YourGithubOwner';
 
-# 修改 api key !
-
 # Install AWS CDK CLI
 npm install -g aws-cdk
 
@@ -67,8 +65,13 @@ npx cdk deploy ServiceStack-beta -c stage=beta --require-approval never
  # Deploy Dashboard ServiceStack
  # Deploy Service ServiceStack
 
+# enable eventbridge to collect flight price  
+
 # invoke report API to see the current report 
 - example url: https://ay0e083p0m.execute-api.us-east-1.amazonaws.com/prod?date=2024-08-02
+
+# clean up
+cdk destroy --all -c stage=beta
 
 # Nexts
  - [DONE] push git commit 
