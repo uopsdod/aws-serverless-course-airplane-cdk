@@ -7,10 +7,10 @@ import { S3StaticWebsiteStack } from '../lib/s3-static-website-stack';
 import { DynamoDBStack } from '../lib/ddb-report';
 // import { QueryDynamoDBStack } from '../lib/api-report';
 
-const accountId = '659104334423';
-const region = 'us-east-1';
 
 const app = new cdk.App();
+const accountId = app.node.tryGetContext('accountId') || 'undefined';
+const region = 'us-east-1';
 const pipelineStack = new PipelineStack(app, 'PipelineStack', {
   env: {
     account: accountId,
@@ -19,7 +19,7 @@ const pipelineStack = new PipelineStack(app, 'PipelineStack', {
 });
 
 // Retrieve the stage context variable, with a default value of 'dev'
-const stage = app.node.tryGetContext('stage') || 'dev';
+const stage = app.node.tryGetContext('stage') || 'undefined';
 const suffix_random = generateRandomSuffix()
 const s3StaticWebsiteStack = new S3StaticWebsiteStack(app, `S3StaticWebsiteStack-${stage}`, {
   STAGE: stage,
