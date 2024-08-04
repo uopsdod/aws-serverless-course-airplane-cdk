@@ -1,0 +1,132 @@
+
+# 登入 Github 
+https://github.com/
+- ex. learncodebypic006@gmail.com
+
+# Fork 複製專案
+- code: https://github.com/uopsdod/aws-serverless-course-airplane
+- infra: https://github.com/uopsdod/aws-serverless-course-airplane-cdk.git
+
+# 建立 Github Token 
+ - Settings > Developer settings > Personal access tokens > Generate new token > Classic
+  - name: "github-token-for-aws-serverless-course-airplane-003"
+  - click 'repo'
+
+# 登入 AWS 
+
+# 切換至 us-east-1 Region 
+
+# 建立 AWS Secret Key 
+- Go to AWS Secrets Manager > Secrets > Create new secret 
+- Secret type: Choose "Other type of secret"
+- Key: "token"
+- Value: paste your GitHub personal access token as the value.
+- Descriptive Secret name: "github-token-for-aws-serverless-course-airplane-001"
+
+# 建立 VPC 
+- name: aws-serverless-final 
+
+# 建立 IAM Role  
+- use case: ec2 
+- policy: AdministratorAccess
+- name: aws-serverless-final-role-for-ec2
+
+# 建立 EC2 
+- name: aws-serverless-final-ec2
+- os: Amazon Linux 2023
+- no key pair
+- vpc: "aws-serverless-final"
+ - public subnet
+ - enable public ip 
+- advanced details > iam role: "aws-serverless-final-role-for-ec2" 
+
+# 進入 EC2 
+# 調整畫面 
+# 安裝 Git 
+sudo dnf install git -y
+
+# 安裝 Node.js 
+curl -sL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo dnf install -y nodejs
+node -v
+npm -v
+
+# 安裝 CDK 指令
+sudo npm install -g aws-cdk
+
+# 下載 CDK 專案
+git clone https://github.com/XXXXX/aws-serverless-course-airplane-cdk.git
+cd aws-serverless-course-airplane-cdk/
+
+# 安裝套件
+npm install @aws-cdk/aws-iam @aws-cdk/aws-ec2 @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment @aws-cdk/aws-lambda @aws-cdk/aws-sns @aws-cdk/aws-events @aws-cdk/aws-events-targets aws-cdk-lib @aws-cdk/core
+npm install --save-dev @types/node
+
+
+# 設定環境參數 
+SECRET_ARN=XXXXX
+echo $SECRET_ARN
+GITHUB_OWNER=XXXXX
+echo $GITHUB_OWNER
+ACCOUNT_ID=XXXXX
+echo $ACCOUNT_ID
+
+# 初始化 CDK Stack 
+cdk bootstrap \
+-c accountId=$ACCOUNT_ID \
+-c secretArn=$SECRET_ARN \
+-c githubOwner=$GITHUB_OWNER
+
+# 部署 Pipeline Stack  
+cdk synth PipelineStack \
+-c accountId=$ACCOUNT_ID \
+-c secretArn=$SECRET_ARN \
+-c githubOwner=$GITHUB_OWNER
+
+cdk deploy PipelineStack \
+-c accountId=$ACCOUNT_ID \
+-c secretArn=$SECRET_ARN \
+-c githubOwner=$GITHUB_OWNER \
+--require-approval never
+
+# Wait for Pipeline Deployment to Finish 
+- Go to CodePipeline > Pipelines 
+ - stages: Source > Build > Deploy-Beta 
+
+# 查看 Wrapper Parser Lambda > Parser Lambda > SNS > Email 
+- Introduce Lambda Layer 
+- Go thourgh Wrapper Lambda code 
+- Intoduce S3 Static Hosting for mock websites 
+- Go through Parser Lambda code 
+- Go Bacl to Wrapper Lambda code 
+- Introduce SNS notification 
+- Sign Up for SNS Email Subscription
+ ex. learncodebypic006@gmail.com
+- Verifi the SNS Subscription email in your mail 
+- Trigger the Wrapper Lambda 
+- Check Email 
+
+# 查看 Wrapper Lambda > Lambda > DynamoDB 
+- Introducde DynamoDB 
+- Trigger the Wrapper Lambda 
+- Check DynamoDB 
+- Enable EventBridge
+- check out DynamoDB 
+
+# 查看 API Gateway > Report Lambda > DynamoDB 
+- check out API Gateway 
+- check out Report Lambda 
+- invoke URL in the browser 
+ - ex. https://9g1371o3yg.execute-api.us-east-1.amazonaws.com/prod?date=2024-08-02
+
+# 資源清理 
+SECRET_ARN=XXXXX
+GITHUB_OWNER=XXXXX
+cdk destroy --all -c stage=beta --force \
+-c accountId=$ACCOUNT_ID \
+-c secretArn=$SECRET_ARN \
+-c githubOwner=$GITHUB_OWNER
+
+EC2 Instance 
+VPC 
+Secret Manager Secret 
